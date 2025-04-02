@@ -39,6 +39,20 @@ const theme = createTheme({
                 },
             },
         },
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    color: 'white', // 모든 버튼의 기본 텍스트 색상을 화이트로 설정
+                },
+                // 특정 버튼 variant에 대한 추가 설정 가능
+                contained: {
+                    color: 'white',
+                },
+                outlined: {
+                    color: 'white',
+                },
+            },
+        },
     },
 });
 
