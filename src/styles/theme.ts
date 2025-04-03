@@ -41,16 +41,14 @@ const theme = createTheme({
         },
         MuiButton: {
             styleOverrides: {
-                root: {
-                    color: 'white', // 모든 버튼의 기본 텍스트 색상을 화이트로 설정
-                },
-                // 특정 버튼 variant에 대한 추가 설정 가능
-                contained: {
+                root: ({ ownerState }) => ({
+                    // 기본 버튼은 흰색 텍스트
                     color: 'white',
-                },
-                outlined: {
-                    color: 'white',
-                },
+                    // variant가 text이고 color가 inherit인 경우(헤더 카테고리 버튼)는 검정색 텍스트
+                    ...(ownerState.variant === 'text' && ownerState.color === 'inherit' && {
+                        color: 'black',
+                    }),
+                }),
             },
         },
     },
