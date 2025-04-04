@@ -6,7 +6,7 @@ import Footer from './Footer';
 
 const Layout = () => {
   // 헤더 높이를 계산 (반응형 디자인 고려)
-  const headerHeight = { xs: '30px', sm: '50px' };
+  const headerHeight = { xs: '60px', sm: '65px' };
 
   return (
     <Box
