@@ -39,6 +39,18 @@ const theme = createTheme({
                 },
             },
         },
+        MuiButton: {
+            styleOverrides: {
+                root: ({ ownerState }) => ({
+                    // 기본 버튼은 흰색 텍스트
+                    color: 'white',
+                    // variant가 text이고 color가 inherit인 경우(헤더 카테고리 버튼)는 검정색 텍스트
+                    ...(ownerState.variant === 'text' && ownerState.color === 'inherit' && {
+                        color: 'black',
+                    }),
+                }),
+            },
+        },
     },
 });
 

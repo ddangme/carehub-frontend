@@ -1,25 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   AppBar, Toolbar, Typography, Button, Box, useMediaQuery,
-  useTheme, IconButton, Menu, MenuItem, Badge
+  useTheme, IconButton, Badge
 } from '@mui/material';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 const Header: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleLogin = () => {
+    navigate('/login');
   };
 
   const categories = [
@@ -141,7 +137,7 @@ const Header: React.FC = () => {
             <IconButton
               color="inherit"
               size="small"
-              onClick={handleMenu}
+              onClick={handleLogin}
               sx={{ padding: 0.5 }}
             >
               <PersonIcon sx={{ fontSize: '1.25rem' }} />
@@ -191,30 +187,6 @@ const Header: React.FC = () => {
           ))}
         </Box>
       )}
-
-      {/* 사용자 메뉴 */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      >
-        <MenuItem
-          onClick={handleClose}
-          component={RouterLink}
-          to="/login"
-        >
-          로그인
-        </MenuItem>
-        <MenuItem
-          onClick={handleClose}
-          component={RouterLink}
-          to="/register"
-        >
-          회원가입
-        </MenuItem>
-      </Menu>
     </Box>
   );
 };
