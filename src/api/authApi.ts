@@ -1,6 +1,23 @@
 import apiClient from './apiClient';
 
-// 응답 타입 정의
+// 사용자 정보 타입 정의
+export interface UserInfo {
+  id: number;
+  email: string;
+  name: string;
+  profileImageUrl?: string;
+}
+
+// 토큰 응답 타입 정의
+export interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  tokenType: string;
+  userInfo: UserInfo;
+}
+
+// 이메일 인증 응답 타입 정의
 export interface EmailVerificationResponse {
   verified: boolean;
   verificationToken: string;
@@ -57,36 +74,48 @@ const authApi = {
    * 로그인
    * @param email 이메일
    * @param password 비밀번호
+   * @param deviceId 기기 식별자 (선택)
+   * @param fcmToken FCM 토큰 (선택)
    * @returns 인증 토큰 정보
    */
-  login: async (email: string, password: string): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
-  }> => {
-    return await apiClient.post('/v1/auth/login', { email, password });
+  login: async (email: string, password: string, deviceId?: string, fcmToken?: string): Promise<TokenResponse> => {
+    return await apiClient.post('/v1/auth/login', {
+      email,
+      password,
+      deviceId,
+      fcmToken
+    });
   },
 
   /**
    * 토큰 갱신
    * @param refreshToken 리프레시 토큰
+   * @param deviceId 기기 식별자 (선택)
    * @returns 새로운 인증 토큰 정보
    */
-  refreshToken: async (refreshToken: string): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    expiresIn: number;
-  }> => {
-    return await apiClient.post('/v1/auth/refresh-token', { refreshToken });
+  refreshToken: async (refreshToken: string, deviceId?: string): Promise<TokenResponse> => {
+    return await apiClient.post('/v1/auth/refresh-token', {
+      refreshToken,
+      deviceId
+    });
   },
 
   /**
    * 로그아웃
+   * @param deviceId 기기 식별자 (선택)
    * @returns void
    */
-  logout: async (): Promise<void> => {
-    return await apiClient.post('/v1/auth/logout');
+  logout: async (deviceId?: string): Promise<void> => {
+    return await apiClient.post('/v1/auth/logout', { deviceId });
   },
+
+  /**
+   * 모든 기기에서 로그아웃
+   * @returns void
+   */
+  logoutAll: async (): Promise<void> => {
+    return await apiClient.post('/v1/auth/logout-all');
+  }
 };
 
 export default authApi;
