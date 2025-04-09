@@ -2,9 +2,10 @@ import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import Layout from '@/shared/components/Layout';
 import HomePage from '@/pages/Home';
 import NotFoundPage from '@/pages/NotFound';
-import LoginPage from '@/pages/Login.tsx';
-import Register from '@/shared/components/auth/Register.tsx';
+import LoginPage from '@/pages/Login';
+import Register from '@/shared/components/auth/Register';
 import PrivateRoute from '@/shared/components/auth/PrivateRoute';
+import KakaoCallback from '@/pages/KakaoCallBack.tsx';
 
 export const Routes = () => {
   return (
@@ -14,6 +15,9 @@ export const Routes = () => {
         <Route index element={<HomePage />} /> {/* 홈 페이지는 공개 접근 가능 */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<Register />} />
+
+        {/* 카카오 로그인 콜백 처리 라우트 추가 */}
+        <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 
         {/* 보호된 라우트 */}
         <Route element={<PrivateRoute />}>
