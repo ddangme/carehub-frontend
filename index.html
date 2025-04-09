@@ -1,13 +1,27 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Care Hub</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/icon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Care Hub</title>
+
+  <!-- 카카오 SDK 스크립트 추가 -->
+  <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+  <script>
+    // 카카오 SDK 초기화
+    window.Kakao = window.Kakao || {};
+    function initKakao() {
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+        window.Kakao.init('%VITE_KAKAO_CLIENT_ID%');
+        console.log('Kakao SDK initialized');
+      }
+    }
+    window.addEventListener('load', initKakao);
+  </script>
+</head>
+<body>
+<div id="root"></div>
+<script type="module" src="/src/main.tsx"></script>
+</body>
 </html>

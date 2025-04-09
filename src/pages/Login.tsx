@@ -19,15 +19,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useAuth } from '@/shared/contexts/AuthContext';
-
-// Custom Kakao button icon component
-const KakaoIcon = () => (
-  <img
-    src="/kakao_icon.png"
-    alt="카카오 로그인"
-    style={{ width: 18, height: 18 }}
-  />
-);
+import KakaoLoginButton from '@/shared/components/auth/KakaoLoginButton';
 
 const LoginPage: React.FC = () => {
   const theme = useTheme();
@@ -73,11 +65,6 @@ const LoginPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleKakaoLogin = () => {
-    // Handle Kakao OAuth login
-    console.log('Kakao login clicked');
   };
 
   return (
@@ -256,26 +243,7 @@ const LoginPage: React.FC = () => {
               flexDirection: 'column',
               mb: { xs: 2, sm: 3 }
             }}>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<KakaoIcon />}
-                onClick={handleKakaoLogin}
-                size={isMobile ? "medium" : "large"}
-                sx={{
-                  py: { xs: 1, sm: 1.5 },
-                  backgroundColor: '#FEE500',
-                  color: '#000',
-                  borderColor: '#FEE500',
-                  '&:hover': {
-                    backgroundColor: '#F6DC00',
-                    borderColor: '#F6DC00',
-                  },
-                  fontSize: { xs: '0.8rem', sm: '0.875rem' }
-                }}
-              >
-                카카오 계정으로 로그인
-              </Button>
+              <KakaoLoginButton disabled={isLoading} />
             </Box>
 
             <Box sx={{ textAlign: 'center' }}>
