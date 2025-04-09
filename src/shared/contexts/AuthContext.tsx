@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authApi, { TokenResponse, UserInfo } from '@/api/authApi';
+import kakaoApi from '@/api/kakaoApi';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: UserInfo | null;
   login: (email: string, password: string) => Promise<void>;
+  kakaoLogin: (code: string, deviceId?: string, fcmToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
 }
@@ -37,6 +39,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   user: null,
   login: async () => {},
+  kakaoLogin: async () => {},
   logout: async () => {},
   register: async () => {},
 });
@@ -116,6 +119,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // 카카오 로그인 처리
+  const handleKakaoLogin = async (code: string, deviceId?: string, fcmToken?: string): Promise<void> => {
+    setIsLoading(true);
+
+    try {
+      deviceId = deviceId || localStorage.getItem(DEVICE_ID_KEY) || generateDeviceId();
+
+      // 카카오 로그인 API 호출
+      const response = await kakaoApi.loginWithKakao(code, deviceId, fcmToken);
+
+      // 토큰 및 사용자 정보 저장
+      saveAuthData(response);
+
+      setIsAuthenticated(true);
+      setUser(response.userInfo);
+
+      // 인증 완료 후 홈으로 리다이렉트는 호출하는 컴포넌트에서 처리
+    } catch (error) {
+      console.error('카카오 로그인 실패:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 로그아웃 처리
   const handleLogout = async (callApi: boolean = true): Promise<void> => {
     setIsLoading(true);
@@ -173,6 +201,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     user,
     login: handleLogin,
+    kakaoLogin: handleKakaoLogin,
     logout: handleLogout,
     register: handleRegister,
   };
