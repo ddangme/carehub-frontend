@@ -6,6 +6,8 @@ import LoginPage from '@/pages/Login';
 import Register from '@/shared/components/auth/Register';
 import PrivateRoute from '@/shared/components/auth/PrivateRoute';
 import KakaoCallback from '@/pages/KakaoCallBack.tsx';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 
 export const Routes = () => {
   return (
@@ -15,6 +17,8 @@ export const Routes = () => {
         <Route index element={<HomePage />} /> {/* 홈 페이지는 공개 접근 가능 */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* 카카오 로그인 콜백 처리 라우트 추가 */}
         <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
