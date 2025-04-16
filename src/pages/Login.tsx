@@ -12,30 +12,26 @@ import {
   IconButton,
   Alert,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  CircularProgress
 } from '@mui/material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-
-// Custom Kakao button icon component
-const KakaoIcon = () => (
-  <img
-    src="/kakao_icon.png"
-    alt="카카오 로그인"
-    style={{ width: 18, height: 18 }}
-  />
-);
+import { useAuth } from '@/shared/contexts/AuthContext';
+import KakaoLoginButton from '@/shared/components/auth/KakaoLoginButton';
 
 const LoginPage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -56,25 +52,19 @@ const LoginPage: React.FC = () => {
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
     try {
-      // Here you would add your actual login logic
-      console.log('Login attempt with:', { email, password });
-
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Redirect to home or dashboard upon successful login
-      navigate('/');
-
-    } catch (err) {
-      setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+      // AuthContext의 login 함수 호출
+      await login(email, password);
+      // 로그인 성공 시 홈으로 리다이렉트 (AuthContext 내부에서 처리)
+    } catch (err: any) {
+      setError(err.message || '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
       console.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleKakaoLogin = () => {
-    // Handle Kakao OAuth login
-    console.log('Kakao login clicked');
   };
 
   return (
@@ -218,6 +208,7 @@ const LoginPage: React.FC = () => {
               variant="contained"
               color="primary"
               size={isMobile ? "medium" : "large"}
+              disabled={isLoading}
               sx={{
                 mt: { xs: 1, sm: 1 },
                 mb: { xs: 1, sm: 0.5 },
@@ -226,7 +217,11 @@ const LoginPage: React.FC = () => {
                 fontSize: { xs: '0.875rem', sm: '1rem' }
               }}
             >
-              로그인
+              {isLoading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                '로그인'
+              )}
             </Button>
 
             <Divider sx={{
@@ -248,26 +243,7 @@ const LoginPage: React.FC = () => {
               flexDirection: 'column',
               mb: { xs: 2, sm: 3 }
             }}>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<KakaoIcon />}
-                onClick={handleKakaoLogin}
-                size={isMobile ? "medium" : "large"}
-                sx={{
-                  py: { xs: 1, sm: 1.5 },
-                  backgroundColor: '#FEE500',
-                  color: '#000',
-                  borderColor: '#FEE500',
-                  '&:hover': {
-                    backgroundColor: '#F6DC00',
-                    borderColor: '#F6DC00',
-                  },
-                  fontSize: { xs: '0.8rem', sm: '0.875rem' }
-                }}
-              >
-                카카오 계정으로 로그인
-              </Button>
+              <KakaoLoginButton disabled={isLoading} />
             </Box>
 
             <Box sx={{ textAlign: 'center' }}>
