@@ -115,7 +115,43 @@ const authApi = {
    */
   logoutAll: async (): Promise<void> => {
     return await apiClient.post('/v1/auth/logout-all');
-  }
+  },
+
+  // authApi.ts 파일에 추가할 함수들입니다
+
+  /**
+   * 비밀번호 재설정 이메일 요청
+   * @param email 이메일
+   * @returns void
+   */
+  requestPasswordReset: async (email: string): Promise<void> => {
+    return await apiClient.post('/v1/auth/password-reset/request', { email });
+  },
+
+  /**
+   * 비밀번호 재설정 토큰 검증
+   * @param email 이메일
+   * @param token 토큰
+   * @returns 토큰 검증 결과
+   */
+  verifyPasswordResetToken: async (email: string, token: string): Promise<{ verified: boolean }> => {
+    return await apiClient.post('/v1/auth/password-reset/verify-token', { email, token });
+  },
+
+  /**
+   * 비밀번호 재설정
+   * @param email 이메일
+   * @param token 토큰
+   * @param newPassword 새 비밀번호
+   * @returns void
+   */
+  resetPassword: async (email: string, token: string, newPassword: string): Promise<void> => {
+    return await apiClient.post('/v1/auth/password-reset/reset', {
+      email,
+      token,
+      newPassword
+    });
+  },
 };
 
 export default authApi;
