@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import careSubjectApi, { CareSubjectResponse } from '@/api/careSubjectApi';
 import { useSnackbar } from 'notistack';
 
@@ -33,7 +32,6 @@ export const CareSubjectProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
   // 케어 대상 선택

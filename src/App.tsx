@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes } from './routes';
 import { SnackbarProvider } from 'notistack';
 import { CareSubjectProvider } from './shared/contexts/CareSubjectContext';

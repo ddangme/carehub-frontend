@@ -26,7 +26,7 @@ const ProfileCreation: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
 
   // 프로필 타입 선택 상태
-  const [profileType, setProfileType] = useState<ProfileType>(ProfileType.INFANT); // 기본값은 신생아 프로필
+  const [profileType, setProfileType] = useState<ProfileType>(ProfileType.INFANT);
 
   // 기본 프로필 정보 상태
   const [basicInfo, setBasicInfo] = useState({
@@ -51,69 +51,99 @@ const ProfileCreation: React.FC = () => {
     lastCheckupDate: ''
   });
 
-  // 스텝 정의
-  const steps = [
-    '프로필 유형 선택',
-    '기본 정보 입력',
-    ...(profileType === ProfileType.INFANT ? ['신생아 정보 입력'] : []),
-    '정보 확인'
-  ];
+  // 스텝 정의 - 고정된 배열로 관리
+  const steps = profileType === ProfileType.INFANT
+    ? ['프로필 유형 선택', '기본 정보 입력', '신생아 정보 입력', '정보 확인']
+    : ['프로필 유형 선택', '기본 정보 입력', '정보 확인'];
 
-  // 현재 스텝에 따른 컴포넌트 렌더링
-  const getStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return (
-          <ProfileTypeSelection
-            profileType={profileType}
-            setProfileType={setProfileType}
-          />
-        );
-      case 1:
-        return (
-          <BasicInfoForm
-            basicInfo={basicInfo}
-            setBasicInfo={setBasicInfo}
-          />
-        );
-      case 2:
-        if (profileType === ProfileType.INFANT) {
-          return (
-            <InfantInfoForm
-              infantInfo={infantInfo}
-              setInfantInfo={setInfantInfo}
-            />
-          );
-        } else {
-          return (
-            <ProfileSummary
-              profileType={profileType}
-              basicInfo={basicInfo}
-              infantInfo={infantInfo}
-            />
-          );
-        }
-      case 3:
-        return (
-          <ProfileSummary
-            profileType={profileType}
-            basicInfo={basicInfo}
-            infantInfo={infantInfo}
-          />
-        );
-      default:
-        return 'Unknown step';
+  // 컴포넌트 배열 - 각 스텝에 해당하는 컴포넌트를 배열로 관리
+  const getStepComponents = () => {
+    const components = [
+      // 0: 프로필 유형 선택
+      <ProfileTypeSelection
+        key="profile-type"
+        profileType={profileType}
+        setProfileType={setProfileType}
+      />,
+      // 1: 기본 정보 입력
+      <BasicInfoForm
+        key="basic-info"
+        basicInfo={basicInfo}
+        setBasicInfo={setBasicInfo}
+      />
+    ];
+
+    if (profileType === ProfileType.INFANT) {
+      // 신생아 프로필인 경우
+      components.push(
+        // 2: 신생아 정보 입력
+        <InfantInfoForm
+          key="infant-info"
+          infantInfo={infantInfo}
+          setInfantInfo={setInfantInfo}
+        />,
+        // 3: 정보 확인
+        <ProfileSummary
+          key="profile-summary"
+          profileType={profileType}
+          basicInfo={basicInfo}
+          infantInfo={infantInfo}
+        />
+      );
+    } else {
+      // 일반 프로필인 경우
+      components.push(
+        // 2: 정보 확인
+        <ProfileSummary
+          key="profile-summary"
+          profileType={profileType}
+          basicInfo={basicInfo}
+          infantInfo={infantInfo}
+        />
+      );
     }
+
+    return components;
+  };
+
+  const stepComponents = getStepComponents();
+
+  // 기본 정보 유효성 검사
+  const validateBasicInfo = () => {
+    if (!basicInfo.name.trim()) {
+      alert('이름을 입력해주세요.');
+      return false;
+    }
+    if (!basicInfo.birthDate) {
+      alert('생년월일을 선택해주세요.');
+      return false;
+    }
+    return true;
   };
 
   // 다음 스텝으로 이동
   const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    // 기본 정보 입력 단계에서 유효성 검사
+    if (activeStep === 1 && !validateBasicInfo()) {
+      return;
+    }
+
+    console.log('Current step:', activeStep);
+    console.log('Profile type:', profileType);
+    console.log('Steps array:', steps);
+    console.log('Total steps:', steps.length);
+    console.log('Next step will be:', activeStep + 1);
+
+    if (activeStep < steps.length - 1) {
+      setActiveStep(activeStep + 1);
+    }
   };
 
   // 이전 스텝으로 이동
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    if (activeStep > 0) {
+      setActiveStep(activeStep - 1);
+    }
   };
 
   // 프로필 생성 취소
@@ -121,6 +151,60 @@ const ProfileCreation: React.FC = () => {
     if (window.confirm('프로필 생성을 취소하시겠습니까?')) {
       navigate('/care-subjects');
     }
+  };
+
+  // 마지막 단계에서 저장 버튼 클릭 처리
+  const handleSave = async () => {
+    // ProfileSummary 컴포넌트의 저장 함수를 직접 호출하는 대신
+    // 여기서 직접 저장 로직 처리
+    try {
+      if (profileType === ProfileType.INFANT && infantInfo) {
+        const data = {
+          ...basicInfo,
+          ...infantInfo
+        };
+
+        const response = await careSubjectApi.createInfantProfile(data);
+        console.log('Profile created successfully:', response);
+        navigate(`/care-subjects/infant/${response.id}`);
+      } else {
+        const response = await careSubjectApi.createCareSubject(basicInfo);
+        console.log('Profile created successfully:', response);
+        navigate(`/care-subjects/${response.id}`);
+      }
+    } catch (error) {
+      console.error('Profile creation error:', error);
+    }
+  };
+
+  // 프로필 타입 변경 핸들러
+  const handleProfileTypeChange = (newType: ProfileType) => {
+    console.log('Profile type changed:', profileType, '->', newType);
+    setProfileType(newType);
+
+    // 프로필 타입이 변경되면 스텝을 재조정
+    if (activeStep > 1) {
+      setActiveStep(1); // 기본 정보 입력 단계로 이동
+    }
+  };
+
+  // 마지막 스텝인지 확인
+  const isLastStep = activeStep === steps.length - 1;
+
+  // 현재 스텝에 해당하는 컴포넌트 렌더링
+  const renderCurrentStep = () => {
+    // 프로필 타입 선택 단계는 특별 처리 (타입 변경 핸들러 사용)
+    if (activeStep === 0) {
+      return (
+        <ProfileTypeSelection
+          profileType={profileType}
+          setProfileType={handleProfileTypeChange}
+        />
+      );
+    }
+
+    // 나머지 스텝은 배열에서 가져오기
+    return stepComponents[activeStep] || <div>스텝을 찾을 수 없습니다.</div>;
   };
 
   return (
@@ -131,15 +215,15 @@ const ProfileCreation: React.FC = () => {
         </Typography>
 
         <Stepper activeStep={activeStep} sx={{ pt: 3, pb: 5 }}>
-          {steps.map((label) => (
-            <Step key={label}>
+          {steps.map((label, index) => (
+            <Step key={`${label}-${index}`}>
               <StepLabel>{label}</StepLabel>
             </Step>
           ))}
         </Stepper>
 
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-          {getStepContent(activeStep)}
+          {renderCurrentStep()}
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
             <Button
@@ -162,11 +246,10 @@ const ProfileCreation: React.FC = () => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={activeStep === steps.length - 1 ? undefined : handleNext}
-                type={activeStep === steps.length - 1 ? 'submit' : 'button'}
-                form={activeStep === steps.length - 1 ? 'profile-form' : undefined}
+                onClick={isLastStep ? handleSave : handleNext}
+                type="button"
               >
-                {activeStep === steps.length - 1 ? '저장' : '다음'}
+                {isLastStep ? '저장' : '다음'}
               </Button>
             </Box>
           </Box>

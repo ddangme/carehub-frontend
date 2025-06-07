@@ -250,7 +250,7 @@ const ProfileList: React.FC = () => {
         </Paper>
       </Box>
 
-      
+
       {/* 프로필 목록 */}
       {((tabValue === 0 && profiles.length === 0) ||
         (tabValue === 1 && infantProfiles.length === 0)) ? (

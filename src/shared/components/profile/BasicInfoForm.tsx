@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   TextField,
-  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -11,10 +10,10 @@ import {
   FormHelperText,
   IconButton,
   Button,
-  Stack,
   Autocomplete,
   Chip,
-  Avatar
+  Avatar,
+  Stack
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -50,14 +49,13 @@ interface BasicInfoFormProps {
  */
 const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ basicInfo, setBasicInfo }) => {
   // 파일 업로드 상태 관리
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<boolean>(false);
 
   // 에러 메시지 상태 관리
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // 캐어기버 목록 상태 관리 (실제 API로 대체해야 함)
-  const [availableCaregivers, setAvailableCaregivers] = useState<User[]>([
+  const [availableCaregivers] = useState<User[]>([
     { id: 1, name: '홍길동', email: 'hong@example.com', profileImageUrl: '/images/avatar/avatar1.jpg' },
     { id: 2, name: '김철수', email: 'kim@example.com', profileImageUrl: '/images/avatar/avatar2.jpg' },
     { id: 3, name: '이영희', email: 'lee@example.com', profileImageUrl: '/images/avatar/avatar3.jpg' },
@@ -96,7 +94,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ basicInfo, setBasicInfo }
   };
 
   // 추가 보호자 변경 핸들러
-  const handleCaregiversChange = (event: any, newValue: User[]) => {
+  const handleCaregiversChange = (_event: any, newValue: User[]) => {
     setSelectedCaregivers(newValue);
     setBasicInfo((prev: any) => ({
       ...prev,
@@ -120,8 +118,6 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ basicInfo, setBasicInfo }
         return;
       }
 
-      setImageFile(file);
-
       try {
         setUploadProgress(true);
         // 실제 파일 업로드 API 호출
@@ -142,20 +138,7 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ basicInfo, setBasicInfo }
 
   // 이미지 삭제 핸들러
   const handleRemoveImage = () => {
-    setImageFile(null);
     setBasicInfo((prev: any) => ({ ...prev, profileImageUrl: '' }));
-  };
-
-  // 폼 유효성 검사
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!basicInfo.name.trim()) {
-      newErrors.name = '이름은 필수 입력값입니다.';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   return (
@@ -164,190 +147,185 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ basicInfo, setBasicInfo }
         기본 정보
       </Typography>
 
-      <Grid container spacing={3}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
         {/* 프로필 이미지 */}
-        <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%'
-          }}>
-            <Box
-              sx={{
-                width: 150,
-                height: 150,
-                borderRadius: '50%',
-                border: '1px dashed #ccc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
-                mb: 2,
-                position: 'relative',
-                backgroundColor: '#f5f5f5'
-              }}
-            >
-              {basicInfo.profileImageUrl ? (
-                <>
-                  <img
-                    src={basicInfo.profileImageUrl}
-                    alt="프로필 이미지"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  <IconButton
-                    aria-label="delete image"
-                    onClick={handleRemoveImage}
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                      },
-                    }}
-                    size="small"
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </>
-              ) : uploadProgress ? (
-                <Typography variant="body2" color="text.secondary">
-                  이미지 업로드 중...
-                </Typography>
-              ) : (
-                <PhotoCamera sx={{ fontSize: 40, color: '#aaa' }} />
-              )}
-            </Box>
-
-            <Button
-              component="label"
-              variant="outlined"
-              startIcon={<PhotoCamera />}
-              sx={{ mt: 1 }}
-              disabled={uploadProgress}
-            >
-              이미지 업로드
-              <input
-                hidden
-                accept="image/*"
-                type="file"
-                onChange={handleImageUpload}
-              />
-            </Button>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
-              최대 파일 크기: 5MB
-            </Typography>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: { sm: 200 }
+        }}>
+          <Box
+            sx={{
+              width: 150,
+              height: 150,
+              borderRadius: '50%',
+              border: '1px dashed #ccc',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              mb: 2,
+              position: 'relative',
+              backgroundColor: '#f5f5f5'
+            }}
+          >
+            {basicInfo.profileImageUrl ? (
+              <>
+                <img
+                  src={basicInfo.profileImageUrl}
+                  alt="프로필 이미지"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                <IconButton
+                  aria-label="delete image"
+                  onClick={handleRemoveImage}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    },
+                  }}
+                  size="small"
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </>
+            ) : uploadProgress ? (
+              <Typography variant="body2" color="text.secondary">
+                이미지 업로드 중...
+              </Typography>
+            ) : (
+              <PhotoCamera sx={{ fontSize: 40, color: '#aaa' }} />
+            )}
           </Box>
-        </Grid>
+
+          <Button
+            component="label"
+            variant="outlined"
+            startIcon={<PhotoCamera />}
+            sx={{ mt: 1 }}
+            disabled={uploadProgress}
+          >
+            이미지 업로드
+            <input
+              hidden
+              accept="image/*"
+              type="file"
+              onChange={handleImageUpload}
+            />
+          </Button>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
+            최대 파일 크기: 5MB
+          </Typography>
+        </Box>
 
         {/* 기본 정보 입력 폼 */}
-        <Grid item xs={12} sm={8}>
-          <Grid container spacing={2}>
+        <Box sx={{ flex: 1 }}>
+          <Stack spacing={2}>
             {/* 이름 */}
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                id="name"
-                name="name"
-                label="이름"
-                value={basicInfo.name}
-                onChange={handleChange}
-                error={!!errors.name}
-                helperText={errors.name || '케어 대상의 이름을 입력해주세요.'}
-              />
-            </Grid>
+            <TextField
+              required
+              fullWidth
+              id="name"
+              name="name"
+              label="이름"
+              value={basicInfo.name}
+              onChange={handleChange}
+              error={!!errors.name}
+              helperText={errors.name || '케어 대상의 이름을 입력해주세요.'}
+            />
 
-            {/* 생년월일 */}
-            <Grid item xs={12} sm={6}>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  label="생년월일"
-                  value={basicInfo.birthDate ? parseISO(basicInfo.birthDate) : null}
-                  onChange={handleDateChange}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      helperText: '생년월일을 선택해주세요.'
-                    }
-                  }}
-                />
-              </LocalizationProvider>
-            </Grid>
+            {/* 생년월일과 성별 */}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <Box sx={{ flex: 2 }}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    label="생년월일"
+                    value={basicInfo.birthDate ? parseISO(basicInfo.birthDate) : null}
+                    onChange={handleDateChange}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        helperText: '생년월일을 선택해주세요.'
+                      }
+                    }}
+                  />
+                </LocalizationProvider>
+              </Box>
 
-            {/* 성별 */}
-            <Grid item xs={6} sm={3}>
-              <FormControl fullWidth>
-                <InputLabel id="gender-label">성별</InputLabel>
-                <Select
-                  labelId="gender-label"
-                  id="gender"
-                  name="gender"
-                  value={basicInfo.gender}
-                  label="성별"
-                  onChange={handleSelectChange}
-                >
-                  <MenuItem value="M">남성</MenuItem>
-                  <MenuItem value="F">여성</MenuItem>
-                  <MenuItem value="O">기타</MenuItem>
-                </Select>
-                <FormHelperText>선택사항입니다.</FormHelperText>
-              </FormControl>
-            </Grid>
+              <Box sx={{ flex: 1 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="gender-label">성별</InputLabel>
+                  <Select
+                    labelId="gender-label"
+                    id="gender"
+                    name="gender"
+                    value={basicInfo.gender}
+                    label="성별"
+                    onChange={handleSelectChange}
+                  >
+                    <MenuItem value="M">남성</MenuItem>
+                    <MenuItem value="F">여성</MenuItem>
+                    <MenuItem value="O">기타</MenuItem>
+                  </Select>
+                  <FormHelperText>선택사항입니다.</FormHelperText>
+                </FormControl>
+              </Box>
+            </Stack>
 
             {/* 혈액형 */}
-            <Grid item xs={6} sm={3}>
-              <FormControl fullWidth>
-                <InputLabel id="bloodType-label">혈액형</InputLabel>
-                <Select
-                  labelId="bloodType-label"
-                  id="bloodType"
-                  name="bloodType"
-                  value={basicInfo.bloodType}
-                  label="혈액형"
-                  onChange={handleSelectChange}
-                >
-                  <MenuItem value="A">A형</MenuItem>
-                  <MenuItem value="B">B형</MenuItem>
-                  <MenuItem value="O">O형</MenuItem>
-                  <MenuItem value="AB">AB형</MenuItem>
-                  <MenuItem value="OTHER">기타</MenuItem>
-                </Select>
-                <FormHelperText>선택사항입니다.</FormHelperText>
-              </FormControl>
-            </Grid>
+            <FormControl fullWidth>
+              <InputLabel id="bloodType-label">혈액형</InputLabel>
+              <Select
+                labelId="bloodType-label"
+                id="bloodType"
+                name="bloodType"
+                value={basicInfo.bloodType}
+                label="혈액형"
+                onChange={handleSelectChange}
+              >
+                <MenuItem value="A">A형</MenuItem>
+                <MenuItem value="B">B형</MenuItem>
+                <MenuItem value="O">O형</MenuItem>
+                <MenuItem value="AB">AB형</MenuItem>
+                <MenuItem value="OTHER">기타</MenuItem>
+              </Select>
+              <FormHelperText>선택사항입니다.</FormHelperText>
+            </FormControl>
 
             {/* 설명 */}
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                id="description"
-                name="description"
-                label="설명"
-                multiline
-                rows={3}
-                value={basicInfo.description}
-                onChange={handleChange}
-                helperText="케어 대상에 대한 간략한 설명을 입력해주세요."
-              />
-            </Grid>
+            <TextField
+              fullWidth
+              id="description"
+              name="description"
+              label="설명"
+              multiline
+              rows={3}
+              value={basicInfo.description}
+              onChange={handleChange}
+              helperText="케어 대상에 대한 간략한 설명을 입력해주세요."
+            />
 
             {/* 추가 보호자 */}
-            <Grid item xs={12}>
-              <Autocomplete
-                multiple
-                id="additionalCaregivers"
-                options={availableCaregivers}
-                getOptionLabel={(option) => `${option.name} (${option.email})`}
-                value={selectedCaregivers}
-                onChange={handleCaregiversChange}
-                renderTags={(value, getTagProps) =>
-                  value.map((option, index) => (
+            <Autocomplete
+              multiple
+              id="additionalCaregivers"
+              options={availableCaregivers}
+              getOptionLabel={(option) => `${option.name} (${option.email})`}
+              value={selectedCaregivers}
+              onChange={handleCaregiversChange}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => {
+                  const { key, ...chipProps } = getTagProps({ index });
+                  return (
                     <Chip
+                      key={option.id}
                       avatar={
                         <Avatar
                           alt={option.name}
@@ -355,22 +333,22 @@ const BasicInfoForm: React.FC<BasicInfoFormProps> = ({ basicInfo, setBasicInfo }
                         />
                       }
                       label={option.name}
-                      {...getTagProps({ index })}
+                      {...chipProps}
                     />
-                  ))
-                }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="추가 보호자"
-                    helperText="케어 활동을 공유할 추가 보호자를 선택해주세요."
-                  />
-                )}
-              />
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+                  );
+                })
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="추가 보호자"
+                  helperText="케어 활동을 공유할 추가 보호자를 선택해주세요."
+                />
+              )}
+            />
+          </Stack>
+        </Box>
+      </Stack>
     </Box>
   );
 };

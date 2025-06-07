@@ -4,13 +4,13 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Radio,
   RadioGroup,
   FormControlLabel,
   FormControl,
   FormLabel,
-  Paper
+  Paper,
+  Stack
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
@@ -83,78 +83,158 @@ const ProfileTypeSelection: React.FC<ProfileTypeSelectionProps> = ({
           value={profileType}
           onChange={handleChange}
         >
-          <Grid container spacing={3}>
-            {profileTypes.map((type) => (
-              <Grid item xs={12} sm={6} key={type.value}>
-                <Card
-                  variant="outlined"
-                  sx={{
-                    cursor: type.available ? 'pointer' : 'not-allowed',
-                    borderColor: profileType === type.value ? '#3AAA8F' : 'divider',
-                    borderWidth: profileType === type.value ? 2 : 1,
-                    height: '100%',
-                    opacity: type.available ? 1 : 0.6,
-                    position: 'relative',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      borderColor: type.available ? '#3AAA8F' : 'divider',
-                      boxShadow: type.available ? '0 0 0 1px #3AAA8F' : 'none'
-                    }
-                  }}
-                  onClick={() => type.available && setProfileType(type.value as ProfileType)}
-                >
-                  {!type.available && (
-                    <Paper
-                      sx={{
-                        position: 'absolute',
-                        top: 10,
-                        right: 10,
-                        px: 1,
-                        py: 0.5,
-                        bgcolor: 'rgba(0, 0, 0, 0.6)',
-                        color: 'white',
-                        borderRadius: 1,
-                        fontSize: '0.75rem'
-                      }}
-                    >
-                      2차 개발 예정
-                    </Paper>
-                  )}
-                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                    <FormControlLabel
-                      value={type.value}
-                      control={
-                        <Radio
-                          disabled={!type.available}
-                          sx={{
-                            '&.Mui-checked': {
-                              color: '#3AAA8F'
-                            }
-                          }}
-                        />
+          {/* Stack을 사용한 2열 레이아웃 */}
+          <Stack spacing={3}>
+            {/* 첫 번째 행 - 신생아, 어린이 */}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
+              {profileTypes.slice(0, 2).map((type) => (
+                <Box key={type.value} sx={{ flex: 1 }}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      cursor: type.available ? 'pointer' : 'not-allowed',
+                      borderColor: profileType === type.value ? '#3AAA8F' : 'divider',
+                      borderWidth: profileType === type.value ? 2 : 1,
+                      height: '100%',
+                      opacity: type.available ? 1 : 0.6,
+                      position: 'relative',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        borderColor: type.available ? '#3AAA8F' : 'divider',
+                        boxShadow: type.available ? '0 0 0 1px #3AAA8F' : 'none'
                       }
-                      label=""
-                      sx={{
-                        position: 'absolute',
-                        top: 10,
-                        left: 10,
-                        margin: 0
-                      }}
-                    />
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      {type.icon}
-                      <Typography variant="h6" component="div" sx={{ mt: 2, mb: 1 }}>
-                        {type.label}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {type.description}
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                    }}
+                    onClick={() => type.available && setProfileType(type.value as ProfileType)}
+                  >
+                    {!type.available && (
+                      <Paper
+                        sx={{
+                          position: 'absolute',
+                          top: 10,
+                          right: 10,
+                          px: 1,
+                          py: 0.5,
+                          bgcolor: 'rgba(0, 0, 0, 0.6)',
+                          color: 'white',
+                          borderRadius: 1,
+                          fontSize: '0.75rem',
+                          zIndex: 1
+                        }}
+                      >
+                        2차 개발 예정
+                      </Paper>
+                    )}
+                    <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                      <FormControlLabel
+                        value={type.value}
+                        control={
+                          <Radio
+                            disabled={!type.available}
+                            sx={{
+                              '&.Mui-checked': {
+                                color: '#3AAA8F'
+                              }
+                            }}
+                          />
+                        }
+                        label=""
+                        sx={{
+                          position: 'absolute',
+                          top: 10,
+                          left: 10,
+                          margin: 0
+                        }}
+                      />
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        {type.icon}
+                        <Typography variant="h6" component="div" sx={{ mt: 2, mb: 1 }}>
+                          {type.label}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {type.description}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Box>
+              ))}
+            </Stack>
+
+            {/* 두 번째 행 - 노인, 반려동물 */}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
+              {profileTypes.slice(2, 4).map((type) => (
+                <Box key={type.value} sx={{ flex: 1 }}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      cursor: type.available ? 'pointer' : 'not-allowed',
+                      borderColor: profileType === type.value ? '#3AAA8F' : 'divider',
+                      borderWidth: profileType === type.value ? 2 : 1,
+                      height: '100%',
+                      opacity: type.available ? 1 : 0.6,
+                      position: 'relative',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        borderColor: type.available ? '#3AAA8F' : 'divider',
+                        boxShadow: type.available ? '0 0 0 1px #3AAA8F' : 'none'
+                      }
+                    }}
+                    onClick={() => type.available && setProfileType(type.value as ProfileType)}
+                  >
+                    {!type.available && (
+                      <Paper
+                        sx={{
+                          position: 'absolute',
+                          top: 10,
+                          right: 10,
+                          px: 1,
+                          py: 0.5,
+                          bgcolor: 'rgba(0, 0, 0, 0.6)',
+                          color: 'white',
+                          borderRadius: 1,
+                          fontSize: '0.75rem',
+                          zIndex: 1
+                        }}
+                      >
+                        2차 개발 예정
+                      </Paper>
+                    )}
+                    <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                      <FormControlLabel
+                        value={type.value}
+                        control={
+                          <Radio
+                            disabled={!type.available}
+                            sx={{
+                              '&.Mui-checked': {
+                                color: '#3AAA8F'
+                              }
+                            }}
+                          />
+                        }
+                        label=""
+                        sx={{
+                          position: 'absolute',
+                          top: 10,
+                          left: 10,
+                          margin: 0
+                        }}
+                      />
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        {type.icon}
+                        <Typography variant="h6" component="div" sx={{ mt: 2, mb: 1 }}>
+                          {type.label}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {type.description}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Box>
+              ))}
+            </Stack>
+          </Stack>
         </RadioGroup>
       </FormControl>
     </Box>

@@ -3,14 +3,14 @@ import {
   Box,
   Typography,
   Paper,
-  Grid,
   Divider,
   List,
   ListItem,
   ListItemText,
   Avatar,
   Chip,
-  Button
+  Button,
+  Stack
 } from '@mui/material';
 import { format, parseISO } from 'date-fns';
 import { ProfileType } from '@/api/careSubjectApi';
@@ -75,8 +75,13 @@ const ProfileSummary: React.FC<ProfileSummaryProps> = ({
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
-  // 프로필 저장 핸들러
-  const handleSaveProfile = async () => {
+  // 프로필 저장 핸들러 수정
+  const handleSaveProfile = async (e?: React.FormEvent) => {
+    // form submit 이벤트 방지
+    if (e) {
+      e.preventDefault();
+    }
+
     try {
       if (profileType === ProfileType.INFANT && infantInfo) {
         // 신생아 프로필 저장
@@ -112,86 +117,97 @@ const ProfileSummary: React.FC<ProfileSummaryProps> = ({
 
       <Paper variant="outlined" sx={{ p: 3, mb: 4 }}>
         {/* 기본 정보 */}
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
+        <Stack spacing={3}>
+          <Box>
             <Typography variant="h6" gutterBottom color="primary">
               기본 정보
             </Typography>
-            <Divider sx={{ mb: 2 }} />
-          </Grid>
+            <Divider sx={{ mb: 3 }} />
+          </Box>
 
-          <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'center' }}>
-            {basicInfo.profileImageUrl ? (
-              <Avatar
-                alt={basicInfo.name}
-                src={basicInfo.profileImageUrl}
-                sx={{ width: 150, height: 150 }}
-              />
-            ) : (
-              <Avatar
-                sx={{
-                  width: 150,
-                  height: 150,
-                  fontSize: '3rem',
-                  bgcolor: '#D4F0E8',
-                  color: '#3AAA8F'
-                }}
-              >
-                {basicInfo.name.charAt(0)}
-              </Avatar>
-            )}
-          </Grid>
-
-          <Grid item xs={12} sm={8}>
-            <List disablePadding>
-              <ListItem>
-                <ListItemText
-                  primary="이름"
-                  secondary={basicInfo.name || '-'}
-                  primaryTypographyProps={{ variant: 'subtitle2', color: 'text.secondary' }}
-                  secondaryTypographyProps={{ variant: 'body1' }}
+          {/* 프로필 이미지와 기본 정보 */}
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={3}
+            alignItems={{ xs: 'center', md: 'flex-start' }}
+          >
+            {/* 프로필 이미지 */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
+              {basicInfo.profileImageUrl ? (
+                <Avatar
+                  alt={basicInfo.name}
+                  src={basicInfo.profileImageUrl}
+                  sx={{ width: 150, height: 150 }}
                 />
-              </ListItem>
+              ) : (
+                <Avatar
+                  sx={{
+                    width: 150,
+                    height: 150,
+                    fontSize: '3rem',
+                    bgcolor: '#D4F0E8',
+                    color: '#3AAA8F'
+                  }}
+                >
+                  {basicInfo.name.charAt(0)}
+                </Avatar>
+              )}
+            </Box>
 
-              <ListItem>
-                <ListItemText
-                  primary="생년월일"
-                  secondary={basicInfo.birthDate ? format(parseISO(basicInfo.birthDate), 'yyyy년 MM월 dd일') : '-'}
-                  primaryTypographyProps={{ variant: 'subtitle2', color: 'text.secondary' }}
-                  secondaryTypographyProps={{ variant: 'body1' }}
-                />
-              </ListItem>
+            {/* 기본 정보 리스트 */}
+            <Box sx={{ flex: 1, width: '100%' }}>
+              <List disablePadding>
+                <ListItem>
+                  <ListItemText
+                    primary="이름"
+                    secondary={basicInfo.name || '-'}
+                    primaryTypographyProps={{ variant: 'subtitle2', color: 'text.secondary' }}
+                    secondaryTypographyProps={{ variant: 'body1' }}
+                  />
+                </ListItem>
 
-              <ListItem>
-                <ListItemText
-                  primary="성별"
-                  secondary={basicInfo.gender ? genderMap[basicInfo.gender] : '-'}
-                  primaryTypographyProps={{ variant: 'subtitle2', color: 'text.secondary' }}
-                  secondaryTypographyProps={{ variant: 'body1' }}
-                />
-              </ListItem>
+                <ListItem>
+                  <ListItemText
+                    primary="생년월일"
+                    secondary={basicInfo.birthDate ? format(parseISO(basicInfo.birthDate), 'yyyy년 MM월 dd일') : '-'}
+                    primaryTypographyProps={{ variant: 'subtitle2', color: 'text.secondary' }}
+                    secondaryTypographyProps={{ variant: 'body1' }}
+                  />
+                </ListItem>
 
-              <ListItem>
-                <ListItemText
-                  primary="혈액형"
-                  secondary={basicInfo.bloodType ? bloodTypeMap[basicInfo.bloodType] : '-'}
-                  primaryTypographyProps={{ variant: 'subtitle2', color: 'text.secondary' }}
-                  secondaryTypographyProps={{ variant: 'body1' }}
-                />
-              </ListItem>
-            </List>
-          </Grid>
+                <ListItem>
+                  <ListItemText
+                    primary="성별"
+                    secondary={basicInfo.gender ? genderMap[basicInfo.gender] : '-'}
+                    primaryTypographyProps={{ variant: 'subtitle2', color: 'text.secondary' }}
+                    secondaryTypographyProps={{ variant: 'body1' }}
+                  />
+                </ListItem>
 
-          <Grid item xs={12}>
+                <ListItem>
+                  <ListItemText
+                    primary="혈액형"
+                    secondary={basicInfo.bloodType ? bloodTypeMap[basicInfo.bloodType] : '-'}
+                    primaryTypographyProps={{ variant: 'subtitle2', color: 'text.secondary' }}
+                    secondaryTypographyProps={{ variant: 'body1' }}
+                  />
+                </ListItem>
+              </List>
+            </Box>
+          </Stack>
+
+          {/* 설명 */}
+          <Box>
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               설명
             </Typography>
             <Typography variant="body1" paragraph>
               {basicInfo.description || '-'}
             </Typography>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12}>
+          {/* 추가 보호자 */}
+          <Box>
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               추가 보호자
             </Typography>
@@ -212,107 +228,116 @@ const ProfileSummary: React.FC<ProfileSummaryProps> = ({
                 <Typography variant="body1">추가 보호자 없음</Typography>
               )}
             </Box>
-          </Grid>
-        </Grid>
+          </Box>
+        </Stack>
       </Paper>
 
       {/* 신생아 프로필인 경우 추가 정보 표시 */}
       {profileType === ProfileType.INFANT && infantInfo && (
         <Paper variant="outlined" sx={{ p: 3, mb: 4 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
+          <Stack spacing={3}>
+            <Box>
               <Typography variant="h6" gutterBottom color="primary">
                 신생아 정보
               </Typography>
-              <Divider sx={{ mb: 2 }} />
-            </Grid>
+              <Divider sx={{ mb: 3 }} />
+            </Box>
 
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                출생 정보
-              </Typography>
-              <List disablePadding>
-                <ListItem>
-                  <ListItemText
-                    primary="출생 체중"
-                    secondary={infantInfo.birthWeightGrams ? `${infantInfo.birthWeightGrams} g` : '-'}
-                    primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
-                    secondaryTypographyProps={{ variant: 'body1' }}
-                  />
-                </ListItem>
+            {/* 출생 정보와 건강 정보를 가로로 배치 */}
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={3}
+            >
+              {/* 출생 정보 */}
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  출생 정보
+                </Typography>
+                <List disablePadding>
+                  <ListItem>
+                    <ListItemText
+                      primary="출생 체중"
+                      secondary={infantInfo.birthWeightGrams ? `${infantInfo.birthWeightGrams} g` : '-'}
+                      primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
+                      secondaryTypographyProps={{ variant: 'body1' }}
+                    />
+                  </ListItem>
 
-                <ListItem>
-                  <ListItemText
-                    primary="출생 신장"
-                    secondary={infantInfo.birthHeightCm ? `${infantInfo.birthHeightCm} cm` : '-'}
-                    primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
-                    secondaryTypographyProps={{ variant: 'body1' }}
-                  />
-                </ListItem>
+                  <ListItem>
+                    <ListItemText
+                      primary="출생 신장"
+                      secondary={infantInfo.birthHeightCm ? `${infantInfo.birthHeightCm} cm` : '-'}
+                      primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
+                      secondaryTypographyProps={{ variant: 'body1' }}
+                    />
+                  </ListItem>
 
-                <ListItem>
-                  <ListItemText
-                    primary="머리 둘레"
-                    secondary={infantInfo.headCircumferenceCm ? `${infantInfo.headCircumferenceCm} cm` : '-'}
-                    primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
-                    secondaryTypographyProps={{ variant: 'body1' }}
-                  />
-                </ListItem>
+                  <ListItem>
+                    <ListItemText
+                      primary="머리 둘레"
+                      secondary={infantInfo.headCircumferenceCm ? `${infantInfo.headCircumferenceCm} cm` : '-'}
+                      primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
+                      secondaryTypographyProps={{ variant: 'body1' }}
+                    />
+                  </ListItem>
 
-                <ListItem>
-                  <ListItemText
-                    primary="재태 기간"
-                    secondary={infantInfo.gestationalAgeWeeks ? `${infantInfo.gestationalAgeWeeks} 주` : '-'}
-                    primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
-                    secondaryTypographyProps={{ variant: 'body1' }}
-                  />
-                </ListItem>
+                  <ListItem>
+                    <ListItemText
+                      primary="재태 기간"
+                      secondary={infantInfo.gestationalAgeWeeks ? `${infantInfo.gestationalAgeWeeks} 주` : '-'}
+                      primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
+                      secondaryTypographyProps={{ variant: 'body1' }}
+                    />
+                  </ListItem>
 
-                <ListItem>
-                  <ListItemText
-                    primary="분만 유형"
-                    secondary={infantInfo.deliveryType ? deliveryTypeMap[infantInfo.deliveryType] : '-'}
-                    primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
-                    secondaryTypographyProps={{ variant: 'body1' }}
-                  />
-                </ListItem>
-              </List>
-            </Grid>
+                  <ListItem>
+                    <ListItemText
+                      primary="분만 유형"
+                      secondary={infantInfo.deliveryType ? deliveryTypeMap[infantInfo.deliveryType] : '-'}
+                      primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
+                      secondaryTypographyProps={{ variant: 'body1' }}
+                    />
+                  </ListItem>
+                </List>
+              </Box>
 
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                건강 정보
-              </Typography>
-              <List disablePadding>
-                <ListItem>
-                  <ListItemText
-                    primary="알레르기"
-                    secondary={infantInfo.allergies || '-'}
-                    primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
-                    secondaryTypographyProps={{ variant: 'body1' }}
-                  />
-                </ListItem>
+              {/* 건강 정보 */}
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                  건강 정보
+                </Typography>
+                <List disablePadding>
+                  <ListItem>
+                    <ListItemText
+                      primary="알레르기"
+                      secondary={infantInfo.allergies || '-'}
+                      primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
+                      secondaryTypographyProps={{ variant: 'body1' }}
+                    />
+                  </ListItem>
 
-                <ListItem>
-                  <ListItemText
-                    primary="마지막 검진일"
-                    secondary={infantInfo.lastCheckupDate ? format(parseISO(infantInfo.lastCheckupDate), 'yyyy년 MM월 dd일') : '-'}
-                    primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
-                    secondaryTypographyProps={{ variant: 'body1' }}
-                  />
-                </ListItem>
-              </List>
-            </Grid>
+                  <ListItem>
+                    <ListItemText
+                      primary="마지막 검진일"
+                      secondary={infantInfo.lastCheckupDate ? format(parseISO(infantInfo.lastCheckupDate), 'yyyy년 MM월 dd일') : '-'}
+                      primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }}
+                      secondaryTypographyProps={{ variant: 'body1' }}
+                    />
+                  </ListItem>
+                </List>
+              </Box>
+            </Stack>
 
-            <Grid item xs={12}>
+            {/* 특별 케어 요구사항 */}
+            <Box>
               <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                 특별 케어 요구사항
               </Typography>
               <Typography variant="body1" paragraph>
                 {infantInfo.specialCareNeeds || '-'}
               </Typography>
-            </Grid>
-          </Grid>
+            </Box>
+          </Stack>
         </Paper>
       )}
 

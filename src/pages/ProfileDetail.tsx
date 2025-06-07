@@ -3,24 +3,22 @@ import {
   Box,
   Typography,
   Paper,
-  Grid,
   Avatar,
   Chip,
   Button,
-  IconButton,
   Divider,
   Tabs,
   Tab,
   List,
   ListItem,
   ListItemText,
-  CircularProgress,
   Skeleton,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Stack
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -58,6 +56,11 @@ const deliveryTypeMap: Record<string, string> = {
   'OTHER': '기타'
 };
 
+// 타입 가드 함수
+const isInfantProfile = (profile: any): profile is InfantProfileResponse => {
+  return profile.subjectType === 'INFANT';
+};
+
 /**
  * 신생아 프로필 상세 페이지
  */
@@ -74,7 +77,7 @@ const ProfileDetail: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
 
   // 탭 변경 핸들러
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -176,17 +179,22 @@ const ProfileDetail: React.FC = () => {
           <Skeleton width={200} height={40} />
         </Box>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
-          </Grid>
-          <Grid item xs={12} md={8}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+          <Skeleton
+            variant="rectangular"
+            height={300}
+            sx={{
+              borderRadius: 2,
+              width: { xs: '100%', md: 300 }
+            }}
+          />
+          <Box sx={{ flex: 1 }}>
             <Skeleton variant="text" height={60} sx={{ mb: 2 }} />
             <Skeleton variant="text" height={30} sx={{ mb: 1 }} />
             <Skeleton variant="text" height={30} sx={{ mb: 1 }} />
             <Skeleton variant="text" height={30} sx={{ mb: 1 }} />
-          </Grid>
-        </Grid>
+          </Box>
+        </Stack>
       </Box>
     );
   }
@@ -250,9 +258,9 @@ const ProfileDetail: React.FC = () => {
 
       {/* 프로필 기본 정보 */}
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
-        <Grid container spacing={3}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
           {/* 프로필 이미지 및 기본 정보 */}
-          <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
+          <Box sx={{ textAlign: 'center', minWidth: { md: 250 } }}>
             {profile.profileImageUrl ? (
               <Avatar
                 src={profile.profileImageUrl}
@@ -303,17 +311,17 @@ const ProfileDetail: React.FC = () => {
                 {format(parseISO(profile.birthDate), 'yyyy년 MM월 dd일')}
               </Typography>
             )}
-          </Grid>
+          </Box>
 
           {/* 기본 정보 상세 */}
-          <Grid item xs={12} md={8}>
+          <Box sx={{ flex: 1 }}>
             <Typography variant="h6" gutterBottom>
               기본 정보
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <Box sx={{ flex: 1 }}>
                 <List disablePadding>
                   <ListItem sx={{ px: 0 }}>
                     <ListItemText
@@ -333,9 +341,9 @@ const ProfileDetail: React.FC = () => {
                     />
                   </ListItem>
                 </List>
-              </Grid>
+              </Box>
 
-              <Grid item xs={12} sm={6}>
+              <Box sx={{ flex: 1 }}>
                 <List disablePadding>
                   <ListItem sx={{ px: 0 }}>
                     <ListItemText
@@ -359,21 +367,19 @@ const ProfileDetail: React.FC = () => {
                     />
                   </ListItem>
                 </List>
-              </Grid>
+              </Box>
+            </Stack>
 
-              <Grid item xs={12}>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemText
-                    primary="설명"
-                    secondary={profile.description || '-'}
-                    primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
-                    secondaryTypographyProps={{ color: 'text.primary', variant: 'body1' }}
-                  />
-                </ListItem>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+            <ListItem sx={{ px: 0, mt: 1 }}>
+              <ListItemText
+                primary="설명"
+                secondary={profile.description || '-'}
+                primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
+                secondaryTypographyProps={{ color: 'text.primary', variant: 'body1' }}
+              />
+            </ListItem>
+          </Box>
+        </Stack>
       </Paper>
 
       {/* 탭 내비게이션 */}
@@ -404,68 +410,68 @@ const ProfileDetail: React.FC = () => {
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
-            {profile.subjectType === 'INFANT' && (
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Paper elevation={1} sx={{ p: 2 }}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      출생 정보
-                    </Typography>
-                    <List disablePadding>
-                      <ListItem sx={{ px: 0 }}>
-                        <ListItemText
-                          primary="출생 체중"
-                          secondary={(profile as InfantProfileResponse).birthWeightGrams ? `${(profile as InfantProfileResponse).birthWeightGrams} g` : '-'}
-                          primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
-                        />
-                      </ListItem>
+            {isInfantProfile(profile) && (
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+                <Paper elevation={1} sx={{ p: 2, flex: 1 }}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    출생 정보
+                  </Typography>
+                  <List disablePadding>
+                    <ListItem sx={{ px: 0 }}>
+                      <ListItemText
+                        primary="출생 체중"
+                        secondary={profile.birthWeightGrams ? `${profile.birthWeightGrams} g` : '-'}
+                        primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
+                      />
+                    </ListItem>
 
-                      <ListItem sx={{ px: 0 }}>
-                        <ListItemText
-                          primary="출생 신장"
-                          secondary={(profile as InfantProfileResponse).birthHeightCm ? `${(profile as InfantProfileResponse).birthHeightCm} cm` : '-'}
-                          primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
-                        />
-                      </ListItem>
+                    <ListItem sx={{ px: 0 }}>
+                      <ListItemText
+                        primary="출생 신장"
+                        secondary={profile.birthHeightCm ? `${profile.birthHeightCm} cm` : '-'}
+                        primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
+                      />
+                    </ListItem>
 
-                      <ListItem sx={{ px: 0 }}>
-                        <ListItemText
-                          primary="머리 둘레"
-                          secondary={(profile as InfantProfileResponse).headCircumferenceCm ? `${(profile as InfantProfileResponse).headCircumferenceCm} cm` : '-'}
-                          primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
-                        />
-                      </ListItem>
+                    <ListItem sx={{ px: 0 }}>
+                      <ListItemText
+                        primary="머리 둘레"
+                        secondary={profile.headCircumferenceCm ? `${profile.headCircumferenceCm} cm` : '-'}
+                        primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
+                      />
+                    </ListItem>
 
-                      <ListItem sx={{ px: 0 }}>
-                        <ListItemText
-                          primary="재태 기간"
-                          secondary={(profile as InfantProfileResponse).gestationalAgeWeeks ? `${(profile as InfantProfileResponse).gestationalAgeWeeks} 주` : '-'}
-                          primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
-                        />
-                      </ListItem>
+                    <ListItem sx={{ px: 0 }}>
+                      <ListItemText
+                        primary="재태 기간"
+                        secondary={profile.gestationalAgeWeeks ? `${profile.gestationalAgeWeeks} 주` : '-'}
+                        primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
+                      />
+                    </ListItem>
 
-                      <ListItem sx={{ px: 0 }}>
-                        <ListItemText
-                          primary="분만 유형"
-                          secondary={(profile as InfantProfileResponse).deliveryType ? deliveryTypeMap[(profile as InfantProfileResponse).deliveryType] : '-'}
-                          primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
-                        />
-                      </ListItem>
-                    </List>
-                  </Paper>
-                </Grid>
+                    <ListItem sx={{ px: 0 }}>
+                      <ListItemText
+                        primary="분만 유형"
+                        secondary={
+                          profile.deliveryType && deliveryTypeMap[profile.deliveryType]
+                            ? deliveryTypeMap[profile.deliveryType]
+                            : '-'
+                        }
+                        primaryTypographyProps={{ color: 'text.secondary', variant: 'body2' }}
+                      />
+                    </ListItem>
+                  </List>
+                </Paper>
 
-                <Grid item xs={12} md={6}>
-                  <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      특별 케어 요구사항
-                    </Typography>
-                    <Typography variant="body1">
-                      {(profile as InfantProfileResponse).specialCareNeeds || '특별한 케어 요구사항이 없습니다.'}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              </Grid>
+                <Paper elevation={1} sx={{ p: 2, flex: 1 }}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    특별 케어 요구사항
+                  </Typography>
+                  <Typography variant="body1">
+                    {profile.specialCareNeeds || '특별한 케어 요구사항이 없습니다.'}
+                  </Typography>
+                </Paper>
+              </Stack>
             )}
           </Box>
         )}
@@ -478,50 +484,46 @@ const ProfileDetail: React.FC = () => {
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
-            {profile.subjectType === 'INFANT' && (
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Paper elevation={1} sx={{ p: 2 }}>
+            {isInfantProfile(profile) && (
+              <Stack spacing={3}>
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+                  <Paper elevation={1} sx={{ p: 2, flex: 1 }}>
                     <Typography variant="subtitle1" gutterBottom>
                       알레르기 정보
                     </Typography>
                     <Typography variant="body1">
-                      {(profile as InfantProfileResponse).allergies || '알레르기 정보가 없습니다.'}
+                      {profile.allergies || '알레르기 정보가 없습니다.'}
                     </Typography>
                   </Paper>
-                </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <Paper elevation={1} sx={{ p: 2 }}>
+                  <Paper elevation={1} sx={{ p: 2, flex: 1 }}>
                     <Typography variant="subtitle1" gutterBottom>
                       마지막 검진일
                     </Typography>
                     <Typography variant="body1">
-                      {(profile as InfantProfileResponse).lastCheckupDate ?
-                        format(parseISO((profile as InfantProfileResponse).lastCheckupDate), 'yyyy년 MM월 dd일') :
-                        '검진 기록이 없습니다.'}
+                      {profile.lastCheckupDate
+                        ? format(parseISO(profile.lastCheckupDate), 'yyyy년 MM월 dd일')
+                        : '검진 기록이 없습니다.'}
                     </Typography>
                   </Paper>
-                </Grid>
+                </Stack>
 
-                <Grid item xs={12}>
-                  <Paper elevation={1} sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      최근 건강 지표
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      아직 기록된 건강 정보가 없습니다.
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      sx={{ mt: 2 }}
-                      onClick={() => navigate(`/care-subjects/${id}/health-records/create`)}
-                    >
-                      건강 정보 기록하기
-                    </Button>
-                  </Paper>
-                </Grid>
-              </Grid>
+                <Paper elevation={1} sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    최근 건강 지표
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    아직 기록된 건강 정보가 없습니다.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    sx={{ mt: 2 }}
+                    onClick={() => navigate(`/care-subjects/${id}/health-records/create`)}
+                  >
+                    건강 정보 기록하기
+                  </Button>
+                </Paper>
+              </Stack>
             )}
           </Box>
         )}
