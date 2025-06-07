@@ -76,23 +76,23 @@ export interface InfantProfileResponse extends CareSubjectResponse {
 // 케어 대상 API 함수 모음
 const careSubjectApi = {
   /**
-   * 일반 케어 대상 생성
+   * 일반 케어 대상 생성 (신생아 포함)
    */
   createCareSubject: async (data: CareSubjectBase): Promise<CareSubjectResponse> => {
     return await apiClient.post(CARE_SUBJECTS_BASE_URL, data);
   },
 
   /**
-   * 신생아 프로필 생성
+   * 신생아 프로필 생성 - 일반 케어 대상 생성과 동일
    */
   createInfantProfile: async (data: InfantProfile): Promise<InfantProfileResponse> => {
-    return await apiClient.post(`${CARE_SUBJECTS_BASE_URL}/infant`, data);
+    return await apiClient.post(CARE_SUBJECTS_BASE_URL, data);
   },
 
   /**
-   * 케어 대상 목록 조회
+   * 케어 대상 목록 조회 (페이지네이션 없이)
    */
-  getCareSubjects: async (page: number = 0, size: number = 10): Promise<{
+  getCareSubjects: async (): Promise<{
     content: CareSubjectResponse[];
     totalElements: number;
     totalPages: number;
@@ -100,24 +100,42 @@ const careSubjectApi = {
     number: number;
   }> => {
     try {
-      const response = await apiClient.get(`${CARE_SUBJECTS_BASE_URL}?page=${page}&size=${size}`);
-      return response || {
-        content: [],
-        totalElements: 0,
-        totalPages: 0,
-        size: size,
-        number: page
+      const response = await apiClient.get(CARE_SUBJECTS_BASE_URL);
+      // 백엔드에서 List를 반환하므로 페이지네이션 형태로 변환
+      const careSubjects = Array.isArray(response) ? response : [];
+      return {
+        content: careSubjects,
+        totalElements: careSubjects.length,
+        totalPages: 1,
+        size: careSubjects.length,
+        number: 0
       };
     } catch (error) {
       console.error('Failed to fetch care subjects:', error);
-      // 오류 발생 시 빈 응답 반환
       return {
         content: [],
         totalElements: 0,
         totalPages: 0,
-        size: size,
-        number: page
+        size: 0,
+        number: 0
       };
+    }
+  },
+
+  /**
+   * 신생아 프로필 목록 조회 - 일반 목록에서 필터링
+   */
+  getInfantProfiles: async (): Promise<InfantProfileResponse[]> => {
+    try {
+      const response = await apiClient.get(CARE_SUBJECTS_BASE_URL);
+      const allSubjects = Array.isArray(response) ? response : [];
+      // INFANT 타입만 필터링
+      return allSubjects.filter((subject: CareSubjectResponse) =>
+        subject.subjectType === 'INFANT'
+      ) as InfantProfileResponse[];
+    } catch (error) {
+      console.error('Failed to fetch infant profiles:', error);
+      return [];
     }
   },
 
@@ -129,17 +147,10 @@ const careSubjectApi = {
   },
 
   /**
-   * 신생아 프로필 목록 조회
-   */
-  getInfantProfiles: async (): Promise<InfantProfileResponse[]> => {
-    return await apiClient.get(`${CARE_SUBJECTS_BASE_URL}/infant`);
-  },
-
-  /**
-   * 신생아 프로필 상세 조회
+   * 신생아 프로필 상세 조회 - 일반 상세 조회와 동일
    */
   getInfantProfile: async (id: number): Promise<InfantProfileResponse> => {
-    return await apiClient.get(`${CARE_SUBJECTS_BASE_URL}/infant/${id}`);
+    return await apiClient.get(`${CARE_SUBJECTS_BASE_URL}/${id}`);
   },
 
   /**

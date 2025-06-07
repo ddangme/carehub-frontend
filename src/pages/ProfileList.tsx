@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Grid,
   Paper,
   Button,
-  CircularProgress,
   Tabs,
   Tab,
   Card,
@@ -15,14 +13,14 @@ import {
   Avatar,
   Chip,
   Divider,
-  Skeleton
+  Skeleton,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import EventIcon from '@mui/icons-material/Event';
-import { format, parseISO, differenceInDays } from 'date-fns';
+import { parseISO, differenceInDays } from 'date-fns';
 import careSubjectApi, { CareSubjectResponse, InfantProfileResponse } from '@/api/careSubjectApi';
 import { useSnackbar } from 'notistack';
 
@@ -41,7 +39,7 @@ const ProfileList: React.FC = () => {
   const [infantProfiles, setInfantProfiles] = useState<InfantProfileResponse[]>([]);
 
   // 탭 변경 핸들러
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -51,12 +49,19 @@ const ProfileList: React.FC = () => {
     setError(null);
 
     try {
+      // 일반 케어 대상 조회
       const response = await careSubjectApi.getCareSubjects();
-      setProfiles(response.content);
+      setProfiles(response.content || []);
 
-      // 신생아 프로필 별도 조회
-      const infantResponse = await careSubjectApi.getInfantProfiles();
-      setInfantProfiles(infantResponse);
+      // 신생아 프로필 조회 - 에러가 발생해도 무시
+      try {
+        const infantResponse = await careSubjectApi.getInfantProfiles();
+        setInfantProfiles(infantResponse || []);
+      } catch (infantErr: any) {
+        console.warn('Failed to fetch infant profiles:', infantErr);
+        // 신생아 프로필 조회 실패 시 빈 배열로 설정
+        setInfantProfiles([]);
+      }
     } catch (err: any) {
       console.error('Failed to fetch profiles:', err);
       setError('프로필 목록을 불러오는 중 오류가 발생했습니다.');
@@ -123,13 +128,21 @@ const ProfileList: React.FC = () => {
           <Skeleton width={300} height={40} />
         </Box>
 
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)'
+            },
+            gap: 3
+          }}
+        >
           {[1, 2, 3, 4].map((i) => (
-            <Grid item xs={12} sm={6} md={4} key={i}>
-              <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
-            </Grid>
+            <Skeleton key={i} variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
           ))}
-        </Grid>
+        </Box>
       </Box>
     );
   }
@@ -193,44 +206,51 @@ const ProfileList: React.FC = () => {
       </Paper>
 
       {/* 상단 통계 카드 */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', height: '100%' }}>
-            <ChildCareIcon sx={{ fontSize: 40, color: '#3AAA8F', mr: 2 }} />
-            <Box>
-              <Typography variant="body2" color="text.secondary">총 케어 대상</Typography>
-              <Typography variant="h4" component="div" fontWeight="500">
-                {profiles.length}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', height: '100%' }}>
-            <FavoriteIcon sx={{ fontSize: 40, color: '#FE8269', mr: 2 }} />
-            <Box>
-              <Typography variant="body2" color="text.secondary">건강 체크 필요</Typography>
-              <Typography variant="h4" component="div" fontWeight="500">
-                {/* 임시 데이터 */}
-                {Math.floor(Math.random() * 3)}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', height: '100%' }}>
-            <EventIcon sx={{ fontSize: 40, color: '#5D5FEF', mr: 2 }} />
-            <Box>
-              <Typography variant="body2" color="text.secondary">오늘의 일정</Typography>
-              <Typography variant="h4" component="div" fontWeight="500">
-                {/* 임시 데이터 */}
-                {Math.floor(Math.random() * 5)}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: '1fr',
+            sm: 'repeat(3, 1fr)'
+          },
+          gap: 3,
+          mb: 4
+        }}
+      >
+        <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', height: '100%' }}>
+          <ChildCareIcon sx={{ fontSize: 40, color: '#3AAA8F', mr: 2 }} />
+          <Box>
+            <Typography variant="body2" color="text.secondary">총 케어 대상</Typography>
+            <Typography variant="h4" component="div" fontWeight="500">
+              {profiles.length}
+            </Typography>
+          </Box>
+        </Paper>
 
+        <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', height: '100%' }}>
+          <FavoriteIcon sx={{ fontSize: 40, color: '#FE8269', mr: 2 }} />
+          <Box>
+            <Typography variant="body2" color="text.secondary">건강 체크 필요</Typography>
+            <Typography variant="h4" component="div" fontWeight="500">
+              {/* 임시로 0으로 고정 또는 실제 로직 구현 */}
+              0
+            </Typography>
+          </Box>
+        </Paper>
+
+        <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', height: '100%' }}>
+          <EventIcon sx={{ fontSize: 40, color: '#5D5FEF', mr: 2 }} />
+          <Box>
+            <Typography variant="body2" color="text.secondary">오늘의 일정</Typography>
+            <Typography variant="h4" component="div" fontWeight="500">
+              {/* 임시로 0으로 고정 또는 실제 로직 구현 */}
+              0
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
+
+      
       {/* 프로필 목록 */}
       {((tabValue === 0 && profiles.length === 0) ||
         (tabValue === 1 && infantProfiles.length === 0)) ? (
@@ -250,129 +270,138 @@ const ProfileList: React.FC = () => {
           </Button>
         </Paper>
       ) : (
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)'
+            },
+            gap: 3
+          }}
+        >
           {/* 전체 탭 또는 신생아 탭 선택 시 해당하는 프로필 목록 표시 */}
           {(tabValue === 0 ? profiles : infantProfiles).map((profile) => (
-            <Grid item xs={12} sm={6} md={4} key={profile.id}>
-              <Card
-                elevation={2}
-                sx={{
-                  height: '100%',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4
-                  }
-                }}
+            <Card
+              key={profile.id}
+              elevation={2}
+              sx={{
+                height: '100%',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 4
+                }
+              }}
+            >
+              <CardActionArea
+                onClick={() => handleProfileClick(profile.id, profile.subjectType)}
+                sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
               >
-                <CardActionArea
-                  onClick={() => handleProfileClick(profile.id, profile.subjectType)}
-                  sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
-                >
-                  <Box sx={{ position: 'relative' }}>
-                    {profile.profileImageUrl ? (
-                      <CardMedia
-                        component="img"
-                        height="140"
-                        image={profile.profileImageUrl}
-                        alt={profile.name}
-                        sx={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          height: 140,
-                          backgroundColor: '#D4F0E8',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <Avatar
-                          sx={{
-                            width: 80,
-                            height: 80,
-                            fontSize: '2.5rem',
-                            bgcolor: 'white',
-                            color: '#3AAA8F'
-                          }}
-                        >
-                          {profile.name.charAt(0)}
-                        </Avatar>
-                      </Box>
-                    )}
-
-                    {/* 유형 표시 칩 */}
-                    <Chip
-                      label={profile.subjectType === 'INFANT' ? '신생아' : '케어 대상'}
-                      size="small"
-                      color={profile.subjectType === 'INFANT' ? 'primary' : 'default'}
-                      sx={{
-                        position: 'absolute',
-                        top: 8,
-                        right: 8,
-                        backgroundColor: profile.subjectType === 'INFANT' ? '#3AAA8F' : '#F5F5F5',
-                        color: profile.subjectType === 'INFANT' ? 'white' : 'text.primary',
-                        fontWeight: 500
-                      }}
+                <Box sx={{ position: 'relative' }}>
+                  {profile.profileImageUrl ? (
+                    <CardMedia
+                      component="img"
+                      height="140"
+                      image={profile.profileImageUrl}
+                      alt={profile.name}
+                      sx={{ objectFit: 'cover' }}
                     />
-                  </Box>
-
-                  <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="h6" component="div" gutterBottom>
-                      {profile.name}
-                    </Typography>
-
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        {formatAge(profile)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {profile.gender === 'M' ? '남성' :
-                          profile.gender === 'F' ? '여성' :
-                            profile.gender === 'O' ? '기타' : ''}
-                      </Typography>
-                    </Box>
-
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
+                  ) : (
+                    <Box
                       sx={{
-                        mt: 'auto',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
+                        height: 140,
+                        backgroundColor: '#D4F0E8',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
                       }}
                     >
-                      {profile.description || '설명 없음'}
+                      <Avatar
+                        sx={{
+                          width: 80,
+                          height: 80,
+                          fontSize: '2.5rem',
+                          bgcolor: 'white',
+                          color: '#3AAA8F'
+                        }}
+                      >
+                        {profile.name.charAt(0)}
+                      </Avatar>
+                    </Box>
+                  )}
+
+                  {/* 유형 표시 칩 */}
+                  <Chip
+                    label={profile.subjectType === 'INFANT' ? '신생아' : '케어 대상'}
+                    size="small"
+                    color={profile.subjectType === 'INFANT' ? 'primary' : 'default'}
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      backgroundColor: profile.subjectType === 'INFANT' ? '#3AAA8F' : '#F5F5F5',
+                      color: profile.subjectType === 'INFANT' ? 'white' : 'text.primary',
+                      fontWeight: 500
+                    }}
+                  />
+                </Box>
+
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                  <Typography variant="h6" component="div" gutterBottom>
+                    {profile.name}
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {formatAge(profile)}
                     </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {profile.gender === 'M' ? '남성' :
+                        profile.gender === 'F' ? '여성' :
+                          profile.gender === 'O' ? '기타' : ''}
+                    </Typography>
+                  </Box>
 
-                    <Divider sx={{ my: 1.5 }} />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      mt: 'auto',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {profile.description || '설명 없음'}
+                  </Typography>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Avatar
-                          src={profile.mainCaregiver.profileImageUrl}
-                          alt={profile.mainCaregiver.name}
-                          sx={{ width: 24, height: 24, mr: 1 }}
-                        />
-                        <Typography variant="caption" color="text.secondary">
-                          {profile.mainCaregiver.name}
-                        </Typography>
-                      </Box>
+                  <Divider sx={{ my: 1.5 }} />
 
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Avatar
+                        src={profile.mainCaregiver.profileImageUrl}
+                        alt={profile.mainCaregiver.name}
+                        sx={{ width: 24, height: 24, mr: 1 }}
+                      />
                       <Typography variant="caption" color="text.secondary">
-                        {profile.caregivers.length > 0 ? `+${profile.caregivers.length}명` : ''}
+                        {profile.mainCaregiver.name}
                       </Typography>
                     </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
+
+                    <Typography variant="caption" color="text.secondary">
+                      {profile.caregivers.length > 0 ? `+${profile.caregivers.length}명` : ''}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </CardActionArea>
+            </Card>
           ))}
-        </Grid>
+        </Box>
       )}
     </Box>
   );
