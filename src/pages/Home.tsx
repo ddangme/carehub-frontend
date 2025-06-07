@@ -1,15 +1,13 @@
 import React from 'react';
 import {
   Box,
-  Container,
   Typography,
-  Grid,
   Paper,
   Button,
   Card,
-  CardContent,
   CardActionArea,
-  Avatar
+  Avatar,
+  Stack
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -72,77 +70,89 @@ const HomePage: React.FC = () => {
         </Paper>
       ) : (
         /* 케어 대상이 있는 경우 대시보드 표시 */
-        <Grid container spacing={3}>
+        <Stack spacing={3}>
           {/* 빠른 링크 섹션 */}
-          <Grid item xs={12}>
+          <Box>
             <Typography variant="h6" gutterBottom>
               빠른 링크
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={6} sm={3}>
-                <Card>
-                  <CardActionArea
-                    onClick={() => navigate('/care-subjects/create')}
-                    sx={{ p: 2, textAlign: 'center' }}
-                  >
-                    <PersonAddIcon sx={{ fontSize: 40, color: '#3AAA8F', mb: 1 }} />
-                    <Typography variant="body1" fontWeight="medium">
-                      케어 대상 추가
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <Card>
-                  <CardActionArea
-                    onClick={() => navigate('/schedules')}
-                    sx={{ p: 2, textAlign: 'center' }}
-                  >
-                    <EventNoteIcon sx={{ fontSize: 40, color: '#5D5FEF', mb: 1 }} />
-                    <Typography variant="body1" fontWeight="medium">
-                      일정 관리
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <Card>
-                  <CardActionArea
-                    onClick={() => navigate('/health-data')}
-                    sx={{ p: 2, textAlign: 'center' }}
-                  >
-                    <HealthAndSafetyIcon sx={{ fontSize: 40, color: '#FE8269', mb: 1 }} />
-                    <Typography variant="body1" fontWeight="medium">
-                      건강 기록
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <Card>
-                  <CardActionArea
-                    onClick={() => navigate('/care-subjects')}
-                    sx={{ p: 2, textAlign: 'center' }}
-                  >
-                    <ChildCareIcon sx={{ fontSize: 40, color: '#3AAA8F', mb: 1 }} />
-                    <Typography variant="body1" fontWeight="medium">
-                      케어 대상 관리
-                    </Typography>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            </Grid>
-          </Grid>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: 'repeat(2, 1fr)',
+                  sm: 'repeat(4, 1fr)'
+                },
+                gap: 2
+              }}
+            >
+              <Card>
+                <CardActionArea
+                  onClick={() => navigate('/care-subjects/create')}
+                  sx={{ p: 2, textAlign: 'center' }}
+                >
+                  <PersonAddIcon sx={{ fontSize: 40, color: '#3AAA8F', mb: 1 }} />
+                  <Typography variant="body1" fontWeight="medium">
+                    케어 대상 추가
+                  </Typography>
+                </CardActionArea>
+              </Card>
+
+              <Card>
+                <CardActionArea
+                  onClick={() => navigate('/schedules')}
+                  sx={{ p: 2, textAlign: 'center' }}
+                >
+                  <EventNoteIcon sx={{ fontSize: 40, color: '#5D5FEF', mb: 1 }} />
+                  <Typography variant="body1" fontWeight="medium">
+                    일정 관리
+                  </Typography>
+                </CardActionArea>
+              </Card>
+
+              <Card>
+                <CardActionArea
+                  onClick={() => navigate('/health-data')}
+                  sx={{ p: 2, textAlign: 'center' }}
+                >
+                  <HealthAndSafetyIcon sx={{ fontSize: 40, color: '#FE8269', mb: 1 }} />
+                  <Typography variant="body1" fontWeight="medium">
+                    건강 기록
+                  </Typography>
+                </CardActionArea>
+              </Card>
+
+              <Card>
+                <CardActionArea
+                  onClick={() => navigate('/care-subjects')}
+                  sx={{ p: 2, textAlign: 'center' }}
+                >
+                  <ChildCareIcon sx={{ fontSize: 40, color: '#3AAA8F', mb: 1 }} />
+                  <Typography variant="body1" fontWeight="medium">
+                    케어 대상 관리
+                  </Typography>
+                </CardActionArea>
+              </Card>
+            </Box>
+          </Box>
 
           {/* 현재 선택된 케어 대상 정보 */}
           {selectedSubject && (
-            <Grid item xs={12}>
+            <Box>
               <Typography variant="h6" gutterBottom>
                 현재 선택: {selectedSubject.name}
               </Typography>
               <Paper sx={{ p: 3 }}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: 3,
+                    alignItems: { xs: 'center', md: 'flex-start' }
+                  }}
+                >
+                  {/* 프로필 이미지 및 버튼 */}
+                  <Box sx={{ textAlign: 'center', flexShrink: 0 }}>
                     {selectedSubject.profileImageUrl ? (
                       <Avatar
                         src={selectedSubject.profileImageUrl}
@@ -175,8 +185,10 @@ const HomePage: React.FC = () => {
                     >
                       프로필 보기
                     </Button>
-                  </Grid>
-                  <Grid item xs={12} md={8}>
+                  </Box>
+
+                  {/* 설명 및 액션 버튼 */}
+                  <Box sx={{ flex: 1 }}>
                     <Typography variant="body1" paragraph>
                       {selectedSubject.description || `${selectedSubject.name}에 대한 정보를 기록하고 관리할 수 있습니다.`}
                     </Typography>
@@ -200,12 +212,12 @@ const HomePage: React.FC = () => {
                         메모 작성
                       </Button>
                     </Box>
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
               </Paper>
-            </Grid>
+            </Box>
           )}
-        </Grid>
+        </Stack>
       )}
     </Box>
   );
