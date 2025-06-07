@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import {
   Box,
-  FormControl,
   MenuItem,
-  Select,
-  SelectChangeEvent,
   Avatar,
   Typography,
   Button,
