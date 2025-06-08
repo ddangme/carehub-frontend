@@ -11,6 +11,9 @@ import ResetPassword from '@/pages/ResetPassword';
 import ProfileList from '@/pages/ProfileList';
 import ProfileDetail from '@/pages/ProfileDetail';
 import ProfileCreation from '@/shared/components/profile/ProfileCreation';
+import CareRecordList from '@/pages/CareRecordList';
+import CareRecordDetail from '@/pages/CareRecordDetail';
+import CareRecordCreate from '@/pages/CareRecordCreate';
 
 export const Routes = () => {
   return (
@@ -33,6 +36,12 @@ export const Routes = () => {
           <Route path="/care-subjects/infant/:id" element={<ProfileDetail />} />
           <Route path="/care-subjects/:id/edit" element={<ProfileCreation />} />
           <Route path="/care-subjects/infant/:id/edit" element={<ProfileCreation />} />
+
+          {/* 케어 기록 관련 라우트 */}
+          <Route path="/care-records" element={<CareRecordList />} />
+          <Route path="/care-records/create" element={<CareRecordCreate />} />
+          <Route path="/care-records/:id" element={<CareRecordDetail />} />
+          <Route path="/care-records/:id/edit" element={<CareRecordCreate />} />
 
           {/* 기타 보호된 라우트들 */}
           <Route path="/profile" element={<div>프로필 페이지</div>} />
