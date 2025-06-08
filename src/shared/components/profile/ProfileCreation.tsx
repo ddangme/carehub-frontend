@@ -10,20 +10,26 @@ import {
   Button,
   Paper
 } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import { ProfileType } from '@/api/careSubjectApi';
+import careSubjectApi from '@/api/careSubjectApi';
 import ProfileTypeSelection from './ProfileTypeSelection';
 import BasicInfoForm from './BasicInfoForm';
 import InfantInfoForm from './InfantInfoForm';
 import ProfileSummary from './ProfileSummary';
+import { useCareSubject } from '@/shared/contexts/CareSubjectContext';
 
 /**
  * 케어 대상 프로필 생성 메인 컴포넌트
  */
 const ProfileCreation: React.FC = () => {
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const { refreshSubjects } = useCareSubject();
 
   // 스텝 관리
   const [activeStep, setActiveStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 프로필 타입 선택 상태
   const [profileType, setProfileType] = useState<ProfileType>(ProfileType.INFANT);
@@ -51,71 +57,19 @@ const ProfileCreation: React.FC = () => {
     lastCheckupDate: ''
   });
 
-  // 스텝 정의 - 고정된 배열로 관리
+  // 스텝 정의
   const steps = profileType === ProfileType.INFANT
     ? ['프로필 유형 선택', '기본 정보 입력', '신생아 정보 입력', '정보 확인']
     : ['프로필 유형 선택', '기본 정보 입력', '정보 확인'];
 
-  // 컴포넌트 배열 - 각 스텝에 해당하는 컴포넌트를 배열로 관리
-  const getStepComponents = () => {
-    const components = [
-      // 0: 프로필 유형 선택
-      <ProfileTypeSelection
-        key="profile-type"
-        profileType={profileType}
-        setProfileType={setProfileType}
-      />,
-      // 1: 기본 정보 입력
-      <BasicInfoForm
-        key="basic-info"
-        basicInfo={basicInfo}
-        setBasicInfo={setBasicInfo}
-      />
-    ];
-
-    if (profileType === ProfileType.INFANT) {
-      // 신생아 프로필인 경우
-      components.push(
-        // 2: 신생아 정보 입력
-        <InfantInfoForm
-          key="infant-info"
-          infantInfo={infantInfo}
-          setInfantInfo={setInfantInfo}
-        />,
-        // 3: 정보 확인
-        <ProfileSummary
-          key="profile-summary"
-          profileType={profileType}
-          basicInfo={basicInfo}
-          infantInfo={infantInfo}
-        />
-      );
-    } else {
-      // 일반 프로필인 경우
-      components.push(
-        // 2: 정보 확인
-        <ProfileSummary
-          key="profile-summary"
-          profileType={profileType}
-          basicInfo={basicInfo}
-          infantInfo={infantInfo}
-        />
-      );
-    }
-
-    return components;
-  };
-
-  const stepComponents = getStepComponents();
-
   // 기본 정보 유효성 검사
   const validateBasicInfo = () => {
     if (!basicInfo.name.trim()) {
-      alert('이름을 입력해주세요.');
+      enqueueSnackbar('이름을 입력해주세요.', { variant: 'error' });
       return false;
     }
     if (!basicInfo.birthDate) {
-      alert('생년월일을 선택해주세요.');
+      enqueueSnackbar('생년월일을 선택해주세요.', { variant: 'error' });
       return false;
     }
     return true;
@@ -127,12 +81,6 @@ const ProfileCreation: React.FC = () => {
     if (activeStep === 1 && !validateBasicInfo()) {
       return;
     }
-
-    console.log('Current step:', activeStep);
-    console.log('Profile type:', profileType);
-    console.log('Steps array:', steps);
-    console.log('Total steps:', steps.length);
-    console.log('Next step will be:', activeStep + 1);
 
     if (activeStep < steps.length - 1) {
       setActiveStep(activeStep + 1);
@@ -153,33 +101,49 @@ const ProfileCreation: React.FC = () => {
     }
   };
 
-  // 마지막 단계에서 저장 버튼 클릭 처리
+  // 프로필 저장 함수
   const handleSave = async () => {
-    // ProfileSummary 컴포넌트의 저장 함수를 직접 호출하는 대신
-    // 여기서 직접 저장 로직 처리
+    if (isLoading) return;
+
+    setIsLoading(true);
     try {
-      if (profileType === ProfileType.INFANT && infantInfo) {
+      if (profileType === ProfileType.INFANT) {
+        // 신생아 프로필 저장
         const data = {
           ...basicInfo,
           ...infantInfo
         };
 
         const response = await careSubjectApi.createInfantProfile(data);
-        console.log('Profile created successfully:', response);
+        enqueueSnackbar('신생아 프로필이 성공적으로 생성되었습니다.', { variant: 'success' });
+
+        // 케어 대상 목록 새로고침
+        await refreshSubjects();
+
         navigate(`/care-subjects/infant/${response.id}`);
       } else {
+        // 일반 케어 대상 프로필 저장
         const response = await careSubjectApi.createCareSubject(basicInfo);
-        console.log('Profile created successfully:', response);
+        enqueueSnackbar('케어 대상 프로필이 성공적으로 생성되었습니다.', { variant: 'success' });
+
+        // 케어 대상 목록 새로고침
+        await refreshSubjects();
+
         navigate(`/care-subjects/${response.id}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Profile creation error:', error);
+      enqueueSnackbar(
+        error.message || '프로필 생성 중 오류가 발생했습니다.',
+        { variant: 'error' }
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // 프로필 타입 변경 핸들러
   const handleProfileTypeChange = (newType: ProfileType) => {
-    console.log('Profile type changed:', profileType, '->', newType);
     setProfileType(newType);
 
     // 프로필 타입이 변경되면 스텝을 재조정
@@ -193,18 +157,52 @@ const ProfileCreation: React.FC = () => {
 
   // 현재 스텝에 해당하는 컴포넌트 렌더링
   const renderCurrentStep = () => {
-    // 프로필 타입 선택 단계는 특별 처리 (타입 변경 핸들러 사용)
-    if (activeStep === 0) {
-      return (
-        <ProfileTypeSelection
-          profileType={profileType}
-          setProfileType={handleProfileTypeChange}
-        />
-      );
+    switch (activeStep) {
+      case 0:
+        return (
+          <ProfileTypeSelection
+            profileType={profileType}
+            setProfileType={handleProfileTypeChange}
+          />
+        );
+      case 1:
+        return (
+          <BasicInfoForm
+            basicInfo={basicInfo}
+            setBasicInfo={setBasicInfo}
+          />
+        );
+      case 2:
+        if (profileType === ProfileType.INFANT) {
+          return (
+            <InfantInfoForm
+              infantInfo={infantInfo}
+              setInfantInfo={setInfantInfo}
+            />
+          );
+        } else {
+          return (
+            <ProfileSummary
+              profileType={profileType}
+              basicInfo={basicInfo}
+              infantInfo={infantInfo}
+              showSaveButton={false} // ProfileCreation에서 저장 버튼 제어
+            />
+          );
+        }
+      case 3:
+        // 신생아 프로필의 마지막 단계 (정보 확인)
+        return (
+          <ProfileSummary
+            profileType={profileType}
+            basicInfo={basicInfo}
+            infantInfo={infantInfo}
+            showSaveButton={false} // ProfileCreation에서 저장 버튼 제어
+          />
+        );
+      default:
+        return <div>스텝을 찾을 수 없습니다.</div>;
     }
-
-    // 나머지 스텝은 배열에서 가져오기
-    return stepComponents[activeStep] || <div>스텝을 찾을 수 없습니다.</div>;
   };
 
   return (
@@ -230,6 +228,7 @@ const ProfileCreation: React.FC = () => {
               variant="outlined"
               color="secondary"
               onClick={handleCancel}
+              disabled={isLoading}
             >
               취소
             </Button>
@@ -239,6 +238,7 @@ const ProfileCreation: React.FC = () => {
                   variant="outlined"
                   onClick={handleBack}
                   sx={{ mr: 1 }}
+                  disabled={isLoading}
                 >
                   이전
                 </Button>
@@ -247,9 +247,10 @@ const ProfileCreation: React.FC = () => {
                 variant="contained"
                 color="primary"
                 onClick={isLastStep ? handleSave : handleNext}
+                disabled={isLoading}
                 type="button"
               >
-                {isLastStep ? '저장' : '다음'}
+                {isLoading ? '저장 중...' : (isLastStep ? '저장' : '다음')}
               </Button>
             </Box>
           </Box>

@@ -9,14 +9,10 @@ import {
   ListItemText,
   Avatar,
   Chip,
-  Button,
-  Stack
+  Stack, Button,
 } from '@mui/material';
 import { format, parseISO } from 'date-fns';
 import { ProfileType } from '@/api/careSubjectApi';
-import careSubjectApi from '@/api/careSubjectApi';
-import { useNavigate } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
 
 // 성별 표시 매핑
 const genderMap: Record<string, string> = {
@@ -62,51 +58,22 @@ interface ProfileSummaryProps {
     specialCareNeeds: string;
     lastCheckupDate: string;
   };
+  showSaveButton?: boolean; // 저장 버튼 표시 여부 제어
+  onSave?: () => void; // 저장 함수 (옵션)
 }
 
 /**
- * 프로필 정보 확인 및 제출 컴포넌트
+ * 프로필 정보 확인 컴포넌트
  */
 const ProfileSummary: React.FC<ProfileSummaryProps> = ({
                                                          profileType,
                                                          basicInfo,
-                                                         infantInfo
+                                                         infantInfo,
+                                                         showSaveButton = false,
+                                                         onSave
                                                        }) => {
-  const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
-
-  // 프로필 저장 핸들러 수정
-  const handleSaveProfile = async (e?: React.FormEvent) => {
-    // form submit 이벤트 방지
-    if (e) {
-      e.preventDefault();
-    }
-
-    try {
-      if (profileType === ProfileType.INFANT && infantInfo) {
-        // 신생아 프로필 저장
-        const data = {
-          ...basicInfo,
-          ...infantInfo
-        };
-
-        const response = await careSubjectApi.createInfantProfile(data);
-        enqueueSnackbar('신생아 프로필이 성공적으로 생성되었습니다.', { variant: 'success' });
-        navigate(`/care-subjects/infant/${response.id}`);
-      } else {
-        // 일반 케어 대상 프로필 저장
-        const response = await careSubjectApi.createCareSubject(basicInfo);
-        enqueueSnackbar('케어 대상 프로필이 성공적으로 생성되었습니다.', { variant: 'success' });
-        navigate(`/care-subjects/${response.id}`);
-      }
-    } catch (error) {
-      console.error('Profile creation error:', error);
-      enqueueSnackbar('프로필 생성 중 오류가 발생했습니다.', { variant: 'error' });
-    }
-  };
-
   return (
-    <Box component="form" id="profile-form" onSubmit={handleSaveProfile}>
+    <Box>
       <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
         프로필 정보 확인
       </Typography>
@@ -341,17 +308,20 @@ const ProfileSummary: React.FC<ProfileSummaryProps> = ({
         </Paper>
       )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={handleSaveProfile}
-          sx={{ px: 4, py: 1 }}
-        >
-          프로필 저장
-        </Button>
-      </Box>
+      {/* 조건부 저장 버튼 (외부에서 제어) */}
+      {showSaveButton && onSave && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={onSave}
+            sx={{ px: 4, py: 1 }}
+          >
+            프로필 저장
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };
