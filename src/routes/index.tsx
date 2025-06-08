@@ -5,9 +5,12 @@ import NotFoundPage from '@/pages/NotFound';
 import LoginPage from '@/pages/Login';
 import Register from '@/shared/components/auth/Register';
 import PrivateRoute from '@/shared/components/auth/PrivateRoute';
-import KakaoCallback from '@/pages/KakaoCallBack.tsx';
+import KakaoCallback from '@/pages/KakaoCallBack';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import ProfileList from '@/pages/ProfileList';
+import ProfileDetail from '@/pages/ProfileDetail';
+import ProfileCreation from '@/shared/components/profile/ProfileCreation';
 
 export const Routes = () => {
   return (
@@ -19,15 +22,20 @@ export const Routes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-
-        {/* 카카오 로그인 콜백 처리 라우트 추가 */}
         <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 
         {/* 보호된 라우트 */}
         <Route element={<PrivateRoute />}>
+          {/* 프로필 관련 라우트 */}
+          <Route path="/care-subjects" element={<ProfileList />} />
+          <Route path="/care-subjects/create" element={<ProfileCreation />} />
+          <Route path="/care-subjects/:id" element={<ProfileDetail />} />
+          <Route path="/care-subjects/infant/:id" element={<ProfileDetail />} />
+          <Route path="/care-subjects/:id/edit" element={<ProfileCreation />} />
+          <Route path="/care-subjects/infant/:id/edit" element={<ProfileCreation />} />
+
+          {/* 기타 보호된 라우트들 */}
           <Route path="/profile" element={<div>프로필 페이지</div>} />
-          <Route path="/care-activities" element={<div>케어 활동 페이지</div>} />
-          <Route path="/care-subjects" element={<div>케어 대상 페이지</div>} />
           <Route path="/schedules" element={<div>일정 관리 페이지</div>} />
           <Route path="/health-data" element={<div>건강 데이터 페이지</div>} />
         </Route>
