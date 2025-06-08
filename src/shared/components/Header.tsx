@@ -73,7 +73,7 @@ const Header: React.FC = () => {
   };
 
   const categories = [
-    { name: "케어 기록", path: "/care-activities" },
+    { name: "케어 기록", path: "/" },
     { name: "케어 대상", path: "/care-subjects" },
     { name: "일정 관리", path: "/schedules" },
     { name: "건강 데이터", path: "/health-data" }
