@@ -3,7 +3,7 @@ import {
   Box,
   Typography,
   Button,
-  Grid,
+  Stack,
   Skeleton,
   Alert,
   Pagination,
@@ -120,6 +120,15 @@ const CareRecordList: React.FC = () => {
     setEndDate(null);
   };
 
+  // 레코드를 그룹으로 나누는 함수 (3개씩)
+  const groupRecords = (records: CareRecordResponse[], groupSize: number = 3) => {
+    const groups = [];
+    for (let i = 0; i < records.length; i += groupSize) {
+      groups.push(records.slice(i, i + groupSize));
+    }
+    return groups;
+  };
+
   // 선택된 케어 대상이 없는 경우
   if (!selectedSubject) {
     return (
@@ -211,28 +220,50 @@ const CareRecordList: React.FC = () => {
 
       {/* 로딩 상태 */}
       {loading ? (
-        <Grid container spacing={3}>
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Grid item xs={12} sm={6} md={4} key={i}>
-              <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
-            </Grid>
+        <Stack spacing={3}>
+          {[1, 2].map((rowIndex) => (
+            <Stack
+              key={rowIndex}
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={3}
+            >
+              {[1, 2, 3].map((colIndex) => (
+                <Box key={`${rowIndex}-${colIndex}`} sx={{ flex: 1 }}>
+                  <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
+                </Box>
+              ))}
+            </Stack>
           ))}
-        </Grid>
+        </Stack>
       ) : (
         <>
           {/* 기록 목록 */}
           {records.length > 0 ? (
             <Box>
-              <Grid container spacing={3}>
-                {records.map((record) => (
-                  <Grid item xs={12} sm={6} md={4} key={record.id}>
-                    <CareRecordCard
-                      record={record}
-                      onClick={handleRecordClick}
-                    />
-                  </Grid>
+              <Stack spacing={3}>
+                {groupRecords(records).map((recordGroup, groupIndex) => (
+                  <Stack
+                    key={groupIndex}
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={3}
+                  >
+                    {recordGroup.map((record) => (
+                      <Box key={record.id} sx={{ flex: 1 }}>
+                        <CareRecordCard
+                          record={record}
+                          onClick={handleRecordClick}
+                        />
+                      </Box>
+                    ))}
+                    {/* 마지막 행에서 빈 공간 채우기 */}
+                    {recordGroup.length < 3 &&
+                      Array.from({ length: 3 - recordGroup.length }).map((_, emptyIndex) => (
+                        <Box key={`empty-${groupIndex}-${emptyIndex}`} sx={{ flex: 1 }} />
+                      ))
+                    }
+                  </Stack>
                 ))}
-              </Grid>
+              </Stack>
 
               {/* 페이지네이션 */}
               {pagination.totalPages > 1 && (
