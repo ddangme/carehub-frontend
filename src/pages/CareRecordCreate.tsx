@@ -10,6 +10,7 @@ import {
   Paper,
   Alert
 } from '@mui/material';
+import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { useCareSubject } from '@/shared/contexts/CareSubjectContext';
@@ -88,13 +89,16 @@ const CareRecordCreate: React.FC = () => {
     if (isLoading) return;
 
     setIsLoading(true);
+
+    const formattedDate = format(recordInfo.recordedAt, 'yyyy-MM-dd HH:mm:ss');
+
     try {
       const data: CareRecordCreateRequest = {
         careSubjectId: selectedSubject.id,
         recordType,
         title: recordInfo.title,
         description: recordInfo.description,
-        recordedAt: recordInfo.recordedAt.toISOString(),
+        recordedAt: formattedDate,
         recordData: recordInfo.recordData
       };
 
